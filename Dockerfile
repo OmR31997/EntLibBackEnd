@@ -4,7 +4,7 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Build stage for restoring, building, and publishing the application
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
@@ -20,12 +20,8 @@ WORKDIR "/src/EntLibBackendAPI"
 # Publish the application
 RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Final stage for the runtime
+# Runtime stage
 FROM base AS final
 WORKDIR /app
-
-# Copy published files from the build stage
 COPY --from=build /app/publish .
-
-# Define the entry point for the container
 ENTRYPOINT ["dotnet", "EntLibBackendAPI.dll"]
