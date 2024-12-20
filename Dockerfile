@@ -10,7 +10,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy the project file and restore dependencies
-COPY EntLibBackendAPI/EntLibBackendAPI.csproj EntLibBackendAPI/
+COPY EntLibBackendAPI.csproj EntLibBackendAPI/
 RUN dotnet restore "EntLibBackendAPI.csproj"
 
 # Copy the entire source code
