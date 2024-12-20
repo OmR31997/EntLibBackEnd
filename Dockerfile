@@ -11,7 +11,7 @@ WORKDIR /src
 
 # Copy the project file and restore dependencies
 COPY EntLibBackendAPI/EntLibBackendAPI.csproj EntLibBackendAPI/
-RUN dotnet restore "./EntLibBackendAPI/EntLibBackendAPI.csproj"
+RUN dotnet restore "EntLibBackendAPI.csproj"
 
 # Copy the entire source code
 COPY . .
