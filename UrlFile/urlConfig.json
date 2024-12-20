@@ -1,0 +1,6 @@
+{
+  "MOVIE_API": "https://web-api-32df.onrender.com/api/movies",
+  "SHOW_API": "https://web-api-32df.onrender.com/api/shows",
+  "USER_API": "https://web-api-32df.onrender.com/api/users",
+  "FEED_API": "https://web-api-32df.onrender.com/api/feedbacks"
+}
