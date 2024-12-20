@@ -9,13 +9,13 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy the project file and restore dependencies
-COPY EntLibBackendAPI.csproj EntLibBackendAPI/
+# Copy the project file(s) and restore dependencies
+COPY ["EntLibBackendAPI.csproj", "./"]
 RUN dotnet restore "EntLibBackendAPI.csproj"
 
 # Copy the entire source code
 COPY . .
-WORKDIR "/src/EntLibBackendAPI"
+WORKDIR "/src"
 
 # Publish the application
 RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
@@ -23,5 +23,5 @@ RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 # Runtime stage
 FROM base AS final
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=build /app/publish ./
 ENTRYPOINT ["dotnet", "EntLibBackendAPI.dll"]
