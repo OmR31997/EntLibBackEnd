@@ -9,7 +9,7 @@ namespace EntLibBackendAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Load .env file
+            // Load .env file in development mode
             if (builder.Environment.IsDevelopment())
             {
                 try
@@ -25,13 +25,11 @@ namespace EntLibBackendAPI
 
             // Firebase credential initialization
             string? firebaseKeyPath = Environment.GetEnvironmentVariable("FireBasePath") ?? "/etc/secrets/firebase-config.json";
-
-            // API Urls Initialization
             string? urlApiPath = Environment.GetEnvironmentVariable("ApiUrlPath") ?? "/etc/secrets/urls-path.json";
 
-            if (string.IsNullOrEmpty(firebaseKeyPath) ||  string.IsNullOrEmpty(urlApiPath))
+            if (string.IsNullOrEmpty(firebaseKeyPath) || string.IsNullOrEmpty(urlApiPath))
             {
-                Console.WriteLine("Environment variable 'FireBasePath' or 'FireBasePath' is not set or is empty.");
+                Console.WriteLine("Environment variable 'FireBasePath' or 'ApiUrlPath' is not set or is empty.");
             }
             else
             {
@@ -57,7 +55,7 @@ namespace EntLibBackendAPI
                         Console.WriteLine("Firebase configuration JSON is null or invalid.");
                     }
 
-                    if(urlConfig != null)
+                    if (urlConfig != null)
                     {
                         foreach (var key in urlConfig)
                         {
@@ -91,7 +89,6 @@ namespace EntLibBackendAPI
                           .AllowAnyMethod());
             });
 
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -100,32 +97,31 @@ namespace EntLibBackendAPI
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            // Configure HTTPS redirection and URL bindings for Render deployment
+            // Set the ASPNETCORE_URLS environment variable dynamically for Render deployment
             if (!app.Environment.IsDevelopment())
             {
-                var httpsPort = Environment.GetEnvironmentVariable("PORT") ?? "443"; // Render uses PORT for the service port, default to 443
+                var httpsPort = Environment.GetEnvironmentVariable("PORT") ?? "443"; // Default to 443 if PORT is not set
+
                 if (!string.IsNullOrEmpty(httpsPort))
                 {
-                    // Set ASPNETCORE_URLS environment variable to include HTTP and HTTPS ports
+                    // Set ASPNETCORE_URLS environment variable
                     var urls = $"https://0.0.0.0:{httpsPort};http://0.0.0.0:{httpsPort}";
                     Environment.SetEnvironmentVariable("ASPNETCORE_URLS", urls);
-                    
-                    // Redirect HTTP to HTTPS if needed
-                    app.UseHttpsRedirection();
+
+                    Console.WriteLine($"Configured ASPNETCORE_URLS: {urls}");
+                    app.UseHttpsRedirection(); // Apply HTTPS redirection
                 }
             }
 
-            // Serve static files, enable routing, CORS, and Authorization
+            // Middleware for serving static files, routing, CORS, and authorization
             app.UseStaticFiles();
             app.UseRouting();
             app.UseCors("AllowAngularApp");
             app.UseAuthorization();
 
-            // Root route to Swagger UI
             app.MapGet("/", () => Results.Redirect("/swagger"));
             app.MapControllers();
 
-            // Run the app
             app.Run();
         }
     }
