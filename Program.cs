@@ -104,11 +104,17 @@ namespace EntLibBackendAPI
             // Disable HTTPS redirection in development
             if (!app.Environment.IsDevelopment())
             {
+                // Get the port from the Render environment
                 var httpsPort = Environment.GetEnvironmentVariable("PORT");
-                var urls = $"https://0.0.0.0:{httpsPort};http://0.0.0.0:{httpsPort}";
-                Environment.SetEnvironmentVariable("ASPNETCORE_URLS", urls);
-                app.UseHttpsRedirection();
+                if (!string.IsNullOrEmpty(httpsPort))
+                {
+                    // Set ASPNETCORE_URLS environment variable to include HTTP and HTTPS ports
+                    var urls = $"https://0.0.0.0:{httpsPort};http://0.0.0.0:{httpsPort}";
+                    Environment.SetEnvironmentVariable("ASPNETCORE_URLS", urls);
+                    app.UseHttpsRedirection();
+                }
             }
+
 
             app.UseStaticFiles();
             app.UseRouting();
