@@ -97,31 +97,35 @@ namespace EntLibBackendAPI
 
             var app = builder.Build();
 
-
             app.UseSwagger();
             app.UseSwaggerUI();
-            
-            // Disable HTTPS redirection in development
+
+            // Configure HTTPS redirection and URL bindings for Render deployment
             if (!app.Environment.IsDevelopment())
             {
-                // Get the port from the Render environment
-                var httpsPort = Environment.GetEnvironmentVariable("PORT");
+                var httpsPort = Environment.GetEnvironmentVariable("PORT") ?? "443"; // Render uses PORT for the service port, default to 443
                 if (!string.IsNullOrEmpty(httpsPort))
                 {
                     // Set ASPNETCORE_URLS environment variable to include HTTP and HTTPS ports
                     var urls = $"https://0.0.0.0:{httpsPort};http://0.0.0.0:{httpsPort}";
                     Environment.SetEnvironmentVariable("ASPNETCORE_URLS", urls);
+                    
+                    // Redirect HTTP to HTTPS if needed
                     app.UseHttpsRedirection();
                 }
             }
 
-
+            // Serve static files, enable routing, CORS, and Authorization
             app.UseStaticFiles();
             app.UseRouting();
             app.UseCors("AllowAngularApp");
             app.UseAuthorization();
+
+            // Root route to Swagger UI
             app.MapGet("/", () => Results.Redirect("/swagger"));
             app.MapControllers();
+
+            // Run the app
             app.Run();
         }
     }
