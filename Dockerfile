@@ -1,33 +1,27 @@
-# Use official .NET SDK as a build stage
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
+# Base image for runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
 
-# Copy everything and restore as distinct layers
-COPY *.csproj ./
-RUN dotnet restore
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
 
-# Copy the rest of the application files
-COPY . ./
+# Copy the project file(s) and restore dependencies
+COPY ["EntLibBackendAPI.csproj", "./"]
+RUN dotnet restore "EntLibBackendAPI.csproj"
 
-# Build the application
-RUN dotnet publish -c Release -o out
+# Copy the entire source code
+COPY . .
+WORKDIR "/src"
 
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+# Publish the application
+RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# Runtime stage
+FROM base AS final
 WORKDIR /app
-
-# Environment variables for production
-ENV DOTNET_RUNNING_IN_CONTAINER=true \
-    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
-    FIREBASE_PATH=/etc/secrets/firebase-config.json \
-    API_URL_PATH=/etc/secrets/urls-path.json
-
-# Copy the compiled output from the build stage
-COPY --from=build-env /app/out .
-
-# Expose the port the app runs on
-EXPOSE 80
-EXPOSE 443
-
-# Set the entrypoint
+COPY --from=build /app/publish ./
 ENTRYPOINT ["dotnet", "EntLibBackendAPI.dll"]
