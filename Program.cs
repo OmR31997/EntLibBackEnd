@@ -110,6 +110,7 @@ namespace EntLibBackendAPI
             app.UseRouting();
             app.UseCors("AllowAngularApp");
             app.UseAuthorization();
+            app.MapGet("/", () => Results.Redirect("/swagger"));
             app.MapControllers();
             app.Run();
         }
