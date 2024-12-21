@@ -105,7 +105,7 @@ namespace EntLibBackendAPI
                 if (!string.IsNullOrEmpty(httpsPort))
                 {
                     // Set ASPNETCORE_URLS environment variable
-                    var urls = $"https://0.0.0.0:{httpsPort};http://0.0.0.0:{httpsPort}";
+                    var urls = $"https://entlibbackend.onrender.com";
                     Environment.SetEnvironmentVariable("ASPNETCORE_URLS", urls);
 
                     Console.WriteLine($"Configured ASPNETCORE_URLS: {urls}");
