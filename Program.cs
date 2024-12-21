@@ -100,9 +100,15 @@ namespace EntLibBackendAPI
 
             app.UseSwagger();
             app.UseSwaggerUI();
+            
+            // Disable HTTPS redirection in development
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
+            
             app.UseRouting();
             app.UseCors("AllowAngularApp");
-            app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
             app.Run();
